@@ -36,51 +36,65 @@ function cacheBustAllIcons() {
   }
 }
 
-var checkLink = null;
+// If we're going to be making an icon check later,
+// determine our parameters for checking
+if (window.XMLHttpRequest) {
+  var checkLink = null;
 
-for (var i = headLinks.length; i>=0; i--) {
-  var link = headLinks[i];
-  if (isIconRel.test(link.rel)) {
+  // For all icon link elements from the bottom of <head> to the top
+  for (var i = headLinks.length; i>=0; i--) {
+    var link = headLinks[i];
+    if (isIconRel.test(link.rel)) {
 
-    // if this is the last <link> in <head> with our sentinel attribute
-    if (link.getAttribute('data-freshicon-check') !== null) {
+      // if this is the last <link> in <head> with our sentinel attribute
+      if (link.getAttribute('data-freshicon-check') !== null) {
 
-      // we got a winner, stop searching
-      checkLink = link;
-      break;
+        // we got a winner, stop searching
+        checkLink = link;
+        break;
 
-    // otherwise we prefer the earliest link with the shortest rel
-    } else if (!checkLink || link.rel.length <= checkLink.rel.length) {
-      checkLink = link;
+      // otherwise we prefer the earliest link with the shortest rel
+      } else if (!checkLink || link.rel.length <= checkLink.rel.length) {
+        checkLink = link;
+      }
     }
   }
+
+  var checkUrl;
+  var checkLimit = null, lastCheck = null, nextCheck = null;
+
+  // If we have a link to check, use it, otherwise fall back to /favicon.ico
+  if (checkLink) {
+    checkUrl = checkLink.href;
+    checkLimit = parseInt(
+      checkLink.getAttribute('data-freshicon-check'), 10) * 1000;
+  } else {
+    checkUrl = '/favicon.ico';
+  }
+
+  // If we have local storage support, get request restrictions
+  if (window.localStorage) {
+    var lastCheckKey = 'freshicon last check ' + checkUrl;
+    lastCheck = localStorage.getItem(lastCheckKey);
+    lastCheck = lastCheck && new Date(lastCheck);
+    var nextCheckKey = 'freshicon next check ' + checkUrl;
+    nextCheck = localStorage.getItem(nextCheckKey);
+    nextCheck = nextCheck && new Date(nextCheck);
+  }
 }
-
-var checkUrl;
-var checkLimit = null;
-
-if (checkLink) {
-  checkUrl = checkLink.href;
-  checkLimit = parseInt(
-    checkLink.getAttribute('data-freshicon-check'), 10) * 1000;
-} else {
-  checkUrl = '/favicon.ico';
-}
-
-var lastCheckKey = 'freshicon last check ' + checkUrl;
-var lastCheck = localStorage.getItem(lastCheckKey);
-lastCheck = lastCheck && new Date(lastCheck);
-var nextCheckKey = 'freshicon next check ' + checkUrl;
-var nextCheck = localStorage.getItem(nextCheckKey);
-nextCheck = nextCheck && new Date(nextCheck);
 
 function checkIcon() {
   var xhr = new XMLHttpRequest();
   function updateFaviconState() {
-    var lastETagKey = 'freshicon last etag ' + checkUrl;
-    var lastETag = localStorage.getItem(lastETagKey);
-    var lastModKey = 'freshicon last modified ' + checkUrl;
-    var lastMod = localStorage.getItem(lastModKey);
+    var lastETag = null, lastMod = null;
+
+    // If we have local storage support, get previously-noted cache vars
+    if (window.localStorage) {
+      var lastETagKey = 'freshicon last etag ' + checkUrl;
+      lastETag = localStorage.getItem(lastETagKey);
+      var lastModKey = 'freshicon last modified ' + checkUrl;
+      lastMod = localStorage.getItem(lastModKey);
+    }
 
     var thisETag = xhr.getResponseHeader('ETag');
     var thisLastMod = xhr.getResponseHeader('Last-Modified');
@@ -94,10 +108,13 @@ function checkIcon() {
       cacheBustAllIcons();
     }
 
-    // Save results of this check for next check
-    if (thisETag) localStorage.setItem(lastETagKey, thisETag);
-    if (thisLastMod) localStorage.setItem(lastModKey, thisLastMod);
-    if (shouldNextCheck) localStorage.setItem(nextCheckKey, shouldNextCheck);
+    if (window.localStorage) {
+      // Save results of this check for next check
+      if (thisETag) localStorage.setItem(lastETagKey, thisETag);
+      if (thisLastMod) localStorage.setItem(lastModKey, thisLastMod);
+      if (shouldNextCheck) localStorage.setItem(nextCheckKey, shouldNextCheck);
+      localStorage.setItem(lastCheckKey, new Date());
+    }
   }
   xhr.open('HEAD', cacheBustedUrl(checkUrl), true);
   xhr.onreadystatechange = function(evt) {
@@ -106,12 +123,20 @@ function checkIcon() {
   xhr.send();
 }
 
-// If we're past the locally-set or remotely-requested cache check limit
-if (checkLimit ? (lastCheck ? lastCheck + checkLimit <= now : true)
-  : nextCheck ? nextCheck <= now : true) {
+// If we're capable of checking icons
+if (window.XMLHttpRequest) {
+  // If we're past the locally-set or remotely-requested cache check limit
+  if (checkLimit ? (lastCheck ? lastCheck + checkLimit <= now : true)
+    : nextCheck ? nextCheck <= now : true) {
 
-  // Check to see if the icon has updated
-  checkIcon();
+    // Check to see if the icon has updated
+    checkIcon();
+  }
+
+// If we don't have XHR
+} else {
+  // Cache bust every time
+  cacheBustAllIcons();
 }
 
 })();

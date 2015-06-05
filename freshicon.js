@@ -100,9 +100,9 @@ function checkIcon() {
     var thisLastMod = xhr.getResponseHeader('Last-Modified');
     var shouldNextCheck = xhr.getResponseHeader('Expires');
 
-    // If there's no data indicating the icon is unchanged
-    if (!((lastETag && lastETag == thisETag) ||
-      (lastMod && thisLastMod == lastMod))) {
+    // If the data we have doesn't suggest the icon is unchanged
+    if (!(lastETag && thisETag ? lastETag == thisETag :
+      lastMod && thisLastMod == lastMod)) {
 
       // Ensure we have the newest icon
       cacheBustAllIcons();

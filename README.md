@@ -1,6 +1,8 @@
 # freshicon
 
-Drop-in script to bust favicon caches on an as-needed basis
+Drop-in script to bust favicon caches on an as-needed basis.
+
+[Live demo](http://tilde.works/~spb/freshicon/index.html)
 
 ## Dependencies
 

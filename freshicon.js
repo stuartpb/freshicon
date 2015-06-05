@@ -111,8 +111,11 @@ function checkIcon() {
     if (window.localStorage) {
       // Save results of this check for next check
       if (thisETag) localStorage.setItem(lastETagKey, thisETag);
+      else localStorage.removeItem(lastETagKey);
       if (thisLastMod) localStorage.setItem(lastModKey, thisLastMod);
+      else localStorage.removeItem(lastModKey);
       if (shouldNextCheck) localStorage.setItem(nextCheckKey, shouldNextCheck);
+      else localStorage.removeItem(shouldNextCheck);
       localStorage.setItem(lastCheckKey, new Date());
     }
   }

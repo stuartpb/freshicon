@@ -42,7 +42,7 @@ if (window.XMLHttpRequest) {
   var checkLink = null;
 
   // For all icon link elements from the bottom of <head> to the top
-  for (var i = headLinks.length; i>=0; i--) {
+  for (var i = headLinks.length-1; i>=0; i--) {
     var link = headLinks[i];
     if (isIconRel.test(link.rel)) {
 

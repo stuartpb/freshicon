@@ -4,6 +4,25 @@ Drop-in script to bust favicon caches on an as-needed basis.
 
 [Live demo](http://tilde.works/~spb/freshicon/index.html)
 
+## Background
+
+Browsers don't cache icons the way they cache other resources. Instead of
+actually requesting a page's icon, they check if the URL has changed, and if
+it hasn't, they don't bother checking to see if there's a new version.
+
+In some ways, this is a useful behavior (in that it reduces the number of
+unnecessary requests to your server), but in others, it's pretty lousy. It
+makes it so, if you change your site's favicon, you have to change the icon's
+URL if you want old visitors to see the new icon without having to clear their
+cache and restart their browser. That means you have to have ugly query strings
+unnecessarily cluttering up your HTML for no particularly good reason.
+
+What browsers *should* do is make a lightweight HEAD request to determine if
+the icon has changed (using existing caching mechanisms like ETag), and update
+if so.
+
+That is what this script does.
+
 ## Dependencies
 
 The only hard dependency this script has is that your server can handle a query
@@ -25,25 +44,6 @@ cases:
 
 [polyfills]: https://github.com/Modernizr/Modernizr/wiki/HTML5-Cross-Browser-Polyfills#web-storage-localstorage-and-sessionstorage
 [cors]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS#Access-Control-Allow-Origin
-
-## Background
-
-Browsers don't cache icons the way they cache other resources. Instead of
-actually requesting a page's icon, they check if the URL has changed, and if
-it hasn't, they don't bother checking to see if there's a new version.
-
-In some ways, this is a useful behavior (in that it reduces the number of
-unnecessary requests to your server), but in others, it's pretty lousy. It
-makes it so, if you change your site's favicon, you have to change the icon's
-URL if you want old visitors to see the new icon without having to clear their
-cache and restart their browser. That means you have to have ugly query strings
-unnecessarily cluttering up your HTML for no particularly good reason.
-
-What browsers *should* do is make a lightweight HEAD request to determine if
-the icon has changed (using existing caching mechanisms like ETag), and update
-if so.
-
-That is what this script does.
 
 ## Configuring
 

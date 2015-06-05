@@ -6,14 +6,25 @@ Drop-in script to bust favicon caches on an as-needed basis.
 
 ## Dependencies
 
-- A server that serves ETag or Last-Modified headers for files in response to
-  HEAD requests.
-- A server that can handle a query string like '?_now=1433441550731' at the end
-  of a request for a static file.
-- localStorage and XMLHttpRequest support in-browser (either native or
-  [polyfilled][1]).
+The only hard dependency this script has is that your server can handle a query
+string parameter like '?_now=1433441550731' at the end of requests for your
+icon files (the way pretty much every file server ever written will).
 
-[1]: https://github.com/inexorabletash/polyfill/blob/master/obsolete/storage.js
+To avoid busting the cache when the page's icon has *not* changed, this script
+has a few additional conditions that shouldn't be a problem for 95% of use
+cases:
+
+- The server must serve ETag or Last-Modified headers for files in response to
+  HEAD requests for the checked icon.
+- If the server is on a different domain, the server must also respond to HEAD
+  requests with a matching [`Access-Control-Allow-Origin` CORS header][cors]
+  (as well as an `Access-Control-Expose-Headers` exposing `ETag`, if the
+  server does not respond with a usable `Last-Modified` header.)
+- localStorage and XMLHttpRequest must be available on `window` (either native
+  or [polyfilled][polyfills]).
+
+[polyfills]: https://github.com/Modernizr/Modernizr/wiki/HTML5-Cross-Browser-Polyfills#web-storage-localstorage-and-sessionstorage
+[cors]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS#Access-Control-Allow-Origin
 
 ## Background
 

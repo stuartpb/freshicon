@@ -2,6 +2,12 @@
 
 Drop-in script to bust favicon caches on an as-needed basis.
 
+## This doesn't actually work
+
+I wrote this whole library under the impression that this is what it took to refresh favicons in Google Chrome. However, it turns out that this only works for the first five minutes or so, until the icon gets [irretrievably lost in Chrome's history synchronization](https://code.google.com/p/chromium/issues/detail?id=440322#c6).
+
+So, basically, this script does nothing. However, the live demo is still a useful test of your browser's favicon refreshing ability, as it cycles to a new favicon at the same URL every minute.
+
 [Live demo](http://tilde.works/~spb/freshicon/index.html)
 
 ## Background
